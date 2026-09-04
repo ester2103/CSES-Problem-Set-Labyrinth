@@ -1,1 +1,49 @@
+##  Marco 3 — Aplicação Básica de DFS (Simulação no Exemplo 5x8)
 
+Com base no exemplo de entrada 5x8 fornecido, simulamos a execução de uma Busca em Profundidade (DFS).
+
+**Mapeamento Inicial:**
+* Coordenadas $(linha, coluna)$ baseadas em índice 0.
+* Ponto de Partida `A`: $(1, 2)$
+* Ponto de Destino `B`: $(2, 6)$
+* **Ordem de prioridade de exploração:** Esquerda, Baixo, Direita, Cima (L, D, R, U).
+
+### 1. Execução Manual e Árvore de Busca
+A DFS começa em `A(1,2)` e avança o mais profundo possível na primeira direção válida. Seguindo nossa prioridade (L, D, R, U):
+1. De `(1,2)`, o único passo livre é para a Esquerda $\rightarrow (1,1)$.
+2. De `(1,1)`, desce $\rightarrow (2,1)$.
+3. De `(2,1)`, desce $\rightarrow (3,1)$.
+4. A partir de `(3,1)`, o algoritmo segue um "corredor" direto para a Direita: $\rightarrow (3,2) \rightarrow (3,3) \rightarrow (3,4) \rightarrow (3,5) \rightarrow (3,6)$.
+5. Em `(3,6)`, sobe $\rightarrow (2,6)$, encontrando o destino `B`.
+
+*Nota de Árvore de Busca:* Mesmo após achar `B`, a DFS clássica continua explorando os vizinhos livres para montar a árvore completa. De `B(2,6)`, ela sobe para `(1,6) \rightarrow (1,5) \rightarrow (1,4) \rightarrow (2,4)`. Ao chegar em `(2,4)`, fica sem saídas (beco sem saída) e inicia o *backtracking* (retorno) até `A`.
+
+### 2. Estados de Visita
+Durante a execução, a matriz `boolean[][] visited` garante que não entremos em loop. 
+* Vértices como `(2,2)` e `(2,3)` (paredes `#`) nunca mudam de estado.
+* O caminho `(3,4)` possuía uma bifurcação (podia ir para Direita ou Cima). Como a prioridade "Direita" foi testada primeiro, a célula superior `(2,4)` só foi visitada muito depois, no final da árvore de recursão.
+
+### 3. Tempos de Descoberta ($d$) e Término ($f$)
+Abaixo está o rastreamento do "relógio" $t$ da DFS, que incrementa a cada nova célula descoberta ou finalizada.
+
+| Vértice | Coordenada | $d$ (Descoberta) | $f$ (Término) |
+| :--- | :---: | :---: | :---: |
+| **A (Início)** | `(1,2)` | 1 | 28 |
+| Caminho | `(1,1)` | 2 | 27 |
+| Caminho | `(2,1)` | 3 | 26 |
+| Caminho | `(3,1)` | 4 | 25 |
+| Caminho | `(3,2)` | 5 | 24 |
+| Caminho | `(3,3)` | 6 | 23 |
+| Bifurcação | `(3,4)` | 7 | 22 |
+| Caminho | `(3,5)` | 8 | 21 |
+| Caminho | `(3,6)` | 9 | 20 |
+| **B (Destino)**| `(2,6)` | 10 | 19 |
+| Fundo da Busca | `(1,6)` | 11 | 18 |
+| Fundo da Busca | `(1,5)` | 12 | 17 |
+| Fundo da Busca | `(1,4)` | 13 | 16 |
+| Beco sem saída | `(2,4)` | 14 | 15 |
+
+### 4. Alcançabilidade, Predecessores e Aplicabilidade
+* **Alcançabilidade:** Como $d[B]$ e $f[B]$ foram preenchidos (10 e 19), o vértice `B` é oficialmente alcançável a partir de `A`.
+* **Predecessores ($\pi$):** A matriz de predecessores registrou de onde viemos. Por exemplo: $\pi(B) = (3,6)$; $\pi(3,6) = (3,5)$, e assim sucessivamente até chegar em `A`.
+* **Aplicabilidade ao Problema:** Coincidentemente, por causa da ordem L, D, R, U escolhida, a DFS encontrou o caminho `LDDRRRRRU` (9 passos) de primeira. No entanto, se a prioridade fosse "Cima" antes de "Direita" na bifurcação `(3,4)`, a DFS teria feito uma volta enorme por cima `(1,4)`, resultando em um caminho de 11 passos. Isso reforça a tese de que **a DFS encontra um caminho (alcançabilidade), mas não garante sistematicamente a rota mais curta**, provando que a BFS será necessária no Marco 4.
